@@ -87,7 +87,7 @@ jobs:
         shell: cmd
         run: |
           cd %GITHUB_WORKSPACE%
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\transrangers\include
           set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\range-v3-root\include
           set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\nanobench-root\src\include
