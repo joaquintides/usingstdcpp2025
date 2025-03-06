@@ -75,14 +75,15 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
       - name: Install range-v3
         shell: cmd
         run: |
           cd %GITHUB_WORKSPACE%
           git clone https://github.com/ericniebler/range-v3.git range-v3-root
       - name: Install nanobench
+        shell: cmd
+        run: |
           cd %GITHUB_WORKSPACE%
           git clone https://github.com/martinus/nanobench.git nanobench-root
       - name: Compile
@@ -95,7 +96,6 @@ jobs:
           set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\nanobench-root\src\include
           echo %INCLUDE%
           ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}}
-
       - name: Run tests
         shell: cmd
         run: |
