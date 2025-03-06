@@ -1,0 +1,102 @@
+name: benchmarks
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  posix:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: gcc-x64
+            compiler: g++-14
+            sourcefile: transrangers/perf/perf.cpp
+            compileroptions: -std=c++2b -O3 -DNDEBUG
+            outputfile: perf
+            os: ubuntu-24.04
+            install: g++-14-multilib
+          - name: clang-x64
+            compiler: clang++-18
+            sourcefile: transrangers/perf/perf.cpp
+            compileroptions: -std=c++2b -O3 -DNDEBUG
+            outputfile: perf
+            os: ubuntu-24.04
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install packages
+        if: matrix.install
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{matrix.install}}
+      - name: Install pyperf
+        run: |
+          sudo python -m pip install pyperf
+      - name: Install range-v3
+        run: |
+          cd $GITHUB_WORKSPACE
+          git clone https://github.com/ericniebler/range-v3.git range-v3-root
+      - name: Install nanobench
+        run: |
+          cd $GITHUB_WORKSPACE
+          git clone https://github.com/martinus/nanobench.git nanobench-root
+      - name: Compile
+        run: |
+          cd $GITHUB_WORKSPACE
+          ${{matrix.compiler}} --version
+          ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}} -o ${{matrix.outputfile}} -I$GITHUB_WORKSPACE/transrangers/include -I$GITHUB_WORKSPACE/range-v3-root/include -I$GITHUB_WORKSPACE/nanobench-root/src/include
+      - name: System tuning
+        run: |
+          sudo modprobe msr
+          sudo python -m pyperf system tune
+      - name: Run tests
+        run: |
+          ./${{matrix.outputfile}}
+
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: vs-x64
+            compiler: cl
+            sourcefile: transrangers/perf/perf.cpp
+            compileroptions: /std:c++20 /O2 /GL /D "NDEBUG" /EHsc /MD
+            outputfile: perf.exe            
+            os: windows-2022
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install range-v3
+        shell: cmd
+        run: |
+          cd %GITHUB_WORKSPACE%
+          git clone https://github.com/ericniebler/range-v3.git range-v3-root
+      - name: Install nanobench
+          cd %GITHUB_WORKSPACE%
+          git clone https://github.com/martinus/nanobench.git nanobench-root
+      - name: Compile
+        shell: cmd
+        run: |
+          cd %GITHUB_WORKSPACE%
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
+          set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\transrangers\include
+          set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\range-v3-root\include
+          set INCLUDE=%INCLUDE%;%GITHUB_WORKSPACE%\nanobench-root\src\include
+          echo %INCLUDE%
+          ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}}
+
+      - name: Run tests
+        shell: cmd
+        run: |
+          ${{matrix.outputfile}}
