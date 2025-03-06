@@ -38,9 +38,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ${{matrix.install}}
-      - name: Install pyperf
-        run: |
-          sudo python -m pip install pyperf
       - name: Install range-v3
         run: |
           cd $GITHUB_WORKSPACE
@@ -54,9 +51,6 @@ jobs:
           cd $GITHUB_WORKSPACE
           ${{matrix.compiler}} --version
           ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}} -o ${{matrix.outputfile}} -I$GITHUB_WORKSPACE/transrangers/include -I$GITHUB_WORKSPACE/range-v3-root/include -I$GITHUB_WORKSPACE/nanobench-root/src/include
-      - name: System tuning
-        run: |
-          sudo python -m pyperf system tune
       - name: Run tests
         run: |
           ./${{matrix.outputfile}}
