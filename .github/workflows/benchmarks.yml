@@ -16,7 +16,7 @@ jobs:
           - name: gcc-x64
             compiler: g++-14
             sourcefile: transrangers/perf/perf.cpp
-            compileroptions: -std=c++2b -O3 -DNDEBUG
+            compileroptions: -std=c++2b -O3 -DNDEBUG  -finline-limit=10000
             outputfile: perf
             os: ubuntu-24.04
             install: g++-14-multilib
