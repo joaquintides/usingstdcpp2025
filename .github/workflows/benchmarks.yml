@@ -56,7 +56,6 @@ jobs:
           ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}} -o ${{matrix.outputfile}} -I$GITHUB_WORKSPACE/transrangers/include -I$GITHUB_WORKSPACE/range-v3-root/include -I$GITHUB_WORKSPACE/nanobench-root/src/include
       - name: System tuning
         run: |
-          sudo modprobe msr
           sudo python -m pyperf system tune
       - name: Run tests
         run: |
