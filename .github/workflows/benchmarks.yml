@@ -26,6 +26,13 @@ jobs:
             compileroptions: -std=c++2b -O3 -DNDEBUG
             outputfile: perf
             os: ubuntu-24.04
+          - name: clang-arm64
+            compiler: clang++
+            sourcefile: transrangers/perf/perf.cpp
+            compileroptions: -std=c++2b -O3 -DNDEBUG
+            outputfile: perf
+            os: macos-14
+            xcode_version: 15.4
 
     runs-on: ${{matrix.os}}
 
@@ -53,6 +60,9 @@ jobs:
           ${{matrix.compiler}} ${{matrix.sourcefile}} ${{matrix.compileroptions}} -o ${{matrix.outputfile}} -I$GITHUB_WORKSPACE/transrangers/include -I$GITHUB_WORKSPACE/range-v3-root/include -I$GITHUB_WORKSPACE/nanobench-root/src/include
       - name: Run tests
         run: |
+          if [ -n "${{matrix.xcode_version}}" ]; then
+              DEVELOPER_DIR=/Applications/Xcode-${{matrix.xcode_version}}.app/Contents/Developer
+          fi
           ./${{matrix.outputfile}}
 
   windows:
